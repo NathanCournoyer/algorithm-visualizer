@@ -1,8 +1,12 @@
 "use client";
 
+import React, { useState } from "react";
+
 const DATA_POINT_WIDTH_FACTOR = 5; 
 
 export default function Home() {
+  const [selectedAlgorithm, setSelectedAlgo] = useState("binary, sorted");
+
   return (
     <div className="font-sans w-full flex flex-col items-center justify-center min-h-screen gap-16">
         <div className=" flex flex-row justify-center w-2/4 sm:w-2/4">
@@ -14,14 +18,16 @@ export default function Home() {
         
 
         <ol className=" flex flex-col justify-center mx-auto font-mono text-sm/6 text-center sm:text-left">
-          <li className=" mb-2 ">
-               
+          <li className="mb-2 ">
             <div className="flex flex-row gap-[16px] w-full">
               1. Select a sorting algorithm.
-            <menu className="">
-              <select className="" name="Test" id="algo">
-                <option value={["binary", "sorted"]} className="text-black bg-gray-800">Binary Search</option>
-                <option value={["random", ""]} className="text-black bg-gray-800">Second Option</option>
+            <menu>
+              <select 
+                id="algo"
+                value={selectedAlgorithm}
+                onChange={e => setSelectedAlgo(e.target.value)}>
+                <option value={"binary, sorted"} className="text-black bg-gray-800">Binary Search</option>
+                <option value={"random"} className="text-black bg-gray-800">Second Option</option>
               </select>
             </menu>
             </div>
@@ -35,7 +41,7 @@ export default function Home() {
         <div className=" flex gap-4 items-center flex-col sm:flex-row">
           <button
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            onClick={onGenerateVisualization}
+            onClick={() => {onGenerateVisualization(selectedAlgorithm)}}
           >
             Generate
           </button>
@@ -51,7 +57,7 @@ export default function Home() {
   );
 }
 
-  function onGenerateVisualization() {
+  function onGenerateVisualization(algoSelect: string) {
     const graph : HTMLElement | null = document.getElementById("graph")
 
     if (graph !== null) { 
@@ -59,17 +65,28 @@ export default function Home() {
 
       const graphWidth = graph.offsetWidth            
       const dataSetSize = graphWidth / DATA_POINT_WIDTH_FACTOR
+      const hasToBeSorted = algoSelect.includes("sorted") ?? false
 
+      let nodeValue = "0"
       for (let i = 0; i < dataSetSize; i++) {
         const nodeWidth = (graphWidth / dataSetSize).toString() + "px"
-        const nodeValue = Math.floor(Math.random() * 101 + 1).toString() + "px"
+        if (hasToBeSorted === false) {
+          nodeValue = generateRandomNumber(1, 100).toString() + "px"
+        } else {    
+          nodeValue = generateRandomNumber(i, 100).toString() + "px" 
+        }
+        
         const nodeId = i.toString()
         const node: HTMLElement = generateDataPointNode(nodeValue, nodeWidth, nodeId)
         
         if (node !== null ) {
           graph.appendChild(node)
         } 
-    } 
+      } 
+  }
+
+  function generateRandomNumber(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   function generateDataPointNode(height: string, width: string, nodeId: string) {
